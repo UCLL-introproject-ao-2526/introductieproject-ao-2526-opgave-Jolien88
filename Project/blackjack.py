@@ -147,8 +147,17 @@ def draw_game(act, record, result):
         deal_text = font.render('DEAL HAND', True, 'black')
         screen.blit(deal_text, (165, 50))
         button_list.append(deal)
+    
     # once game started, show hit and stand buttons and win/loss records
     else:
+        # displaying text for modifiers
+        if current_modifier != None:
+            if current_modifier == mod_lucky_start:
+                lucky = pygame.draw.rect(screen, 'red', [65, 220, 500, 100], 0, 5)
+                pygame.draw.rect(screen, 'blue', [65, 220, 500, 100], 3, 5)
+                lucky_text = smaller_font.render('LUCKY START ACTIVE', True, 'black')
+                screen.blit(lucky_text, (105, 250))
+                button_list.append(lucky)
         hit = pygame.draw.rect(screen, 'white', [0, 600, 300, 100], 0, 5)
         pygame.draw.rect(screen, 'green', [0, 600, 300, 100], 3, 5)
         hit_text = font.render('HIT ME', True, 'black')

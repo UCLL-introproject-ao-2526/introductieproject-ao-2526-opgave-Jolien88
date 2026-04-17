@@ -22,5 +22,10 @@ De eerste modifier is Lucky Player, waarbij de speler bij de eerste deal altijd 
 Om de modifiers te verwerken heb ik een aparte functie gemaakt die de initiele eerste deal opzet, zodat ik de gewone deal functie niet moest aanpassen. 
 De volgende stap is zoeken waar ik juist deze initial_deal functie moet implementeren.
 
-## 17 april 2026
+## 17 april 2026 11:18
 Ik wil de deal functie aanpassen zodat de initial deal als aparte functie in het bestand komt te staan en niet samengevoegd met de algemene deal functie. Voor ik startte, heb ik toch nog even de game gespeeld om te zien of alles correct werkt op dit punt.
+Het aanpassen van de gameloop zodat de modifiers werken, ging vrij vlot. Ik moest enkel het gedeelte rond initial_deal aanpassen en ervoor zorgen dat nadien de initial_deal op false kwam te staan en de active game op true.
+Spel getest met modifier geselecteerd en modifier uitgeschakeld. Alles werkt zoals behoren. 
+De volgende stap is een visuele melding maken dat de modifier actief is. 
+
+Geprobeerd om op basis van de deal knop, zelf de 'lucky hand active' tekst te maken. Deze komt nu tevoorschijn voor de hand gedeald is. Beter zou zijn op het moment dat de eerste hand gedeald is. Om dit te doen, functie aangepast zodat de tekst pas komt na de eerste hand gedeald is. Nu zoeken hoe ik de tekst kan laten verdwijnen na enkele seconden, of eerder animatiegericht er iets mee kan doen. Hiervoor de documentatie van pygame geraadpleegd. 
