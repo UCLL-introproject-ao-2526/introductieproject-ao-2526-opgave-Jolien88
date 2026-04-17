@@ -1,0 +1,19 @@
+Reflectie bij video https://youtu.be/oHf1vD5_b5I
+
+Voornaamste punten:
+    - Er bestaan verschillende soorten liftsystemen zoals de hydraulische en tractie. Meestal kom je enkel in contact met de bedieningspanelen in de lift en de hal. 
+    - Een lift wordt bestuurd door een controller. Deze bevat software, verschillende switches, een motor encoder, position indicator, governer, remmen enzovoort
+    - Een lift kan verschilllende modi hebben in dewelke de lift opereert. Voorbeelden zijn de 'out of group service', 'attendant service', 'priority service', 'sabbath mode', 'load bypass', 'antinuance mode', 'riot mode', 'seismic', 'code blue service', 'code pink', 'security service', 'fire service' en 'inspection mode'.
+    - Vaak worden er beveiligingssystemen toegepast in een lift zoals enkel bediening met een keycard, een sleutel of bepaalde verdiepingen zijn niet toegankelijk. 
+    - Fabrikanten gebruiken vaak dezelfde systemen zoals knoppen, switches en zelfs dezelfde sloten en sleutels. Sleutels zijn dus niet uniek. Zelfs sleutelcodes, aanbevolen wachtwoorden voor remote access van de lift enzovoort zijn vaak publiek toegankelijk. Dit komt omdat de liftindustrie geen geschiedenis heeft van het toepassen van veel beveiligingssystemen.
+    - Er zijn verschillende manieren om aan sleutels te raken om een lift in verschillende modi te bedienen en dus eigenlijk 'te hacken'. Je kan ze namaken met de openbaar beschikbare codes, je kan het slot kopen en als er geen sleutel bij is, kun je de code voor de sleutel uitmeten, enzovoort.
+    - Sleutelsystemen zijn niet het enige deel van veiligheidssystemen voor liften. De liftschacht zou nooit toegankelijk mogen zijn, ook de deuren naar de motorkamer moeten zelfsluitend zijn, weet wie je mensen zijn (wie is het onderhoudspersoneel, wie is de vertegenwoordiger, wie is het veiligheidspersoneel?), overweeg logging systemen (gebeurtenissen van het liftsysteem loggen zonder dat de lift met het internet verbonden moet zijn)
+
+
+    Persoonlijke reflectie:
+        Ik vond het een erg interessante video. Ik heb weinig ervaring met liften, maar ik verblijf binnenkort enkele dagen in een hotel waar de liften enkel toegankelijk zijn met je kamersleutel (keycard). Ik ben nu echt geïnteresseerd geraakt om alles eens beter te bekijken als ik de lift neem. De topics die ze aanhaalden omtrent de beveiliging van liften leken mij erg relevant, zeker in tijden waar fysieke beveiliging van gebouwen steeds belangrijker wordt. Dat zulke video's gratis toegankelijk zijn op het internet is aan ene kant een goede zaak. Mensen die dit zien, zoals ik nu, zullen zich bewuster zijn van de systemen die voor de beveiliging van liften zorgen. Ook liftfabrikanten kunnen zulke informatie meenemen in het ontwikkelingsproces. Aan de andere kant is het ook een risico, deze video's en informatie zijn natuurlijk ook toegankelijk voor mensen met minder goede bedoelingen. Ik denk dat het belangrijk is dat ontwikkelaars van liften, eigenaars van gebouwen enzovoort een inhalingbeweging maken om de beveiliging van liften sneller te verhogen.
+        Ik vond de presenteerstijl erg aangenaam. De positieve energie die de presenteerders uitstralen, zorgt ervoor dat je geboeid blijft kijken en luisteren. 
+
+    Conclusie
+        De presentatoren laten zien dat de beveiligingssystemen van liften verre van feilloos zijn. Op een erg entertainende manier geven ze voorbeelden en tips.
+

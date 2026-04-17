@@ -45,15 +45,14 @@ active = False
 records = [0, 0, 0]
 player_score = 0
 dealer_score = 0
-initial_deal = False
+start_new_hand = False
 my_hand = []
 dealer_hand = []
 outcome = 0
 reveal_dealer = False
 hand_active = False
-outcome = 0
 add_score = False
-current_modifier = None
+current_modifier = mod_lucky_start
 
 # Helpfunction
 
@@ -63,6 +62,24 @@ def find_lucky_card(deck):
             return card
     return None
 
+# functie voor intial deal zodat de modifiers kunnen toegepast worden
+def initial_deal(my_hand, dealer_hand, deck):
+    # Lucky Start modifier
+    if current_modifier == mod_lucky_start:
+        lucky_card = find_lucky_card(deck)
+        if lucky_card is not None:
+            my_hand.append(lucky_card)
+            deck.remove(lucky_card)
+        
+    # vul kaarten aan tot 2 kaarten voor de speler
+    while len(my_hand) < 2:
+        my_hand, deck = deal_cards(my_hand, deck)
+
+    # dealer krijgt 2 kaarten
+    while len(dealer_hand) <  2:
+        dealer_hand, deck = deal_cards(dealer_hand, deck)
+    
+    return my_hand, dealer_hand, deck
 
 # deal cards by selecting randomly from deck, and make function for one card at a time
 def deal_cards(current_hand, current_deck):
@@ -188,11 +205,10 @@ while run:
     timer.tick(fps)
     screen.fill('black')
     # initial deal to player and dealer
-    if initial_deal:
-        for i in range(2):
-            my_hand, game_deck = deal_cards(my_hand, game_deck)
-            dealer_hand, game_deck = deal_cards(dealer_hand, game_deck)
-        initial_deal = False
+    if start_new_hand:
+            my_hand, dealer_hand, game_deck = initial_deal(my_hand, dealer_hand, game_deck)
+            start_new_hand = False
+            active = True
 
     # once game is activated, and dealt, calculate scores and display cards
     if active:
@@ -201,7 +217,7 @@ while run:
         if reveal_dealer:
             dealer_score = calculate_score(dealer_hand)
             if dealer_score < 17:
-                dealer_hand, game_deck == deal_cards(dealer_hand, game_deck)
+                dealer_hand, game_deck = deal_cards(dealer_hand, game_deck)
         draw_scores(player_score, dealer_score)
     buttons = draw_game(active, records, outcome)
 
@@ -213,14 +229,13 @@ while run:
             if not active:
                 if buttons[0].collidepoint(event.pos):
                     active = True
-                    initial_deal = True
+                    start_new_hand = True
                     game_deck = copy.deepcopy(decks * one_deck)
                     my_hand = []
                     dealer_hand = []
                     reveal_dealer = False
                     outcome = 0
                     hand_active = True
-                    outcome = 0
                     add_score = True
             else:
                 # if player can hit, allow them to draw a card
@@ -233,14 +248,13 @@ while run:
                 elif len(buttons) == 3:
                     if buttons[2].collidepoint(event.pos):
                         active = True
-                        initial_deal = True
+                        start_new_hand = True
                         game_deck = copy.deepcopy(decks * one_deck)
                         my_hand = []
                         dealer_hand = []
                         reveal_dealer = False
                         outcome = 0
                         hand_active = True
-                        outcome = 0
                         add_score = True
                         player_score = 0
                         dealer_score = 0
