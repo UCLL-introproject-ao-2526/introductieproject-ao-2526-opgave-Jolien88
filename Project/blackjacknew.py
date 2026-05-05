@@ -52,14 +52,7 @@ outcome = 0
 reveal_dealer = False
 hand_active = False
 add_score = False
-
-# variables for implementing modifiers
-current_modifier = None
-dealer_stand_limit = 17
-hidden_dealer_active = False
-
-
-
+current_modifier = mod_lucky_start
 
 # Helpfunction
 
@@ -68,20 +61,6 @@ def find_lucky_card(deck):
         if card in ['10', 'J', 'Q', 'K']:
             return card
     return None
-
-def start_new_round():
-    global current_modifier, dealer_stand_limit, hidden_dealer_active
-
-    current_modifier = random.choice(modifiers)
-
-    dealer_stand_limit = 17
-    hidden_dealer_active = False
-
-    if current_modifier == mod_dealer_19:
-        dealer_stand_limit = 19
-    
-    if current_modifier == mod_hidden_dealer:
-        hidden_dealer_active = True
 
 # functie voor intial deal zodat de modifiers kunnen toegepast worden
 def initial_deal(my_hand, dealer_hand, deck):
@@ -118,10 +97,10 @@ def draw_scores(player, dealer):
 # draw cards visually onto screen
 def draw_cards(player, dealer, reveal):
     for i in range(len(player)):
-        pygame.draw.rect(screen, 'white', [70 + (70 *i), 320 + (5 * i), 120, 220], 0, 5)
-        screen.blit(font.render(player[i], True, 'black'), (75 + 70*i, 325 + 5*i))
-        screen.blit(font.render(player[i], True, 'black'), (75 + 70*i, 495 + 5*i))
-        pygame.draw.rect(screen, 'red', [70 + (70 *i), 320 + (5 * i), 120, 220], 5, 5)
+        pygame.draw.rect(screen, 'white', [70 + (70 *i), 360 + (5 * i), 120, 220], 0, 5)
+        screen.blit(font.render(player[i], True, 'black'), (75 + 70*i, 365 + 5*i))
+        screen.blit(font.render(player[i], True, 'black'), (75 + 70*i, 535 + 5*i))
+        pygame.draw.rect(screen, 'red', [70 + (70 *i), 360 + (5 * i), 120, 220], 5, 5)
     
     # if player hasn't finished turn, dealer will hide one card
     for i in range(len(dealer)):
@@ -195,13 +174,11 @@ def draw_game(act, record, result):
         button_list.append(deal)
     return button_list
     
-    
-    
 # check endgame conditions function
-def check_endgame(hand_act, deal_score, play_score, result, totals, add, dealer_limit):
+def check_endgame(hand_act, deal_score, play_score, result, totals, add):
     # check end game scenarios if player has stood, busted of blackjacked
     # result 1- player bust, 2- win, 3- loss, 4- push
-    if not hand_act and deal_score >= dealer_limit:
+    if not hand_act and deal_score >= 17:
         if play_score > 21:
             result = 1
         elif deal_score < play_score <= 21 or deal_score > 21:
@@ -239,15 +216,10 @@ while run:
         draw_cards(my_hand, dealer_hand, reveal_dealer)
         if reveal_dealer:
             dealer_score = calculate_score(dealer_hand)
-            if dealer_score < dealer_stand_limit:
+            if dealer_score < 17:
                 dealer_hand, game_deck = deal_cards(dealer_hand, game_deck)
         draw_scores(player_score, dealer_score)
     buttons = draw_game(active, records, outcome)
-
-    if active and current_modifier is not None:
-        pygame.draw.rect(screen, (60, 60, 60), [0, 560, WIDTH, 40])
-        info = smaller_font.render(f"Modifier: {current_modifier}", True, "yellow")
-        screen.blit(info, (15, 565))
 
     # event handling, if quit pressed, then exit game
     for event in pygame.event.get():
@@ -265,17 +237,13 @@ while run:
                     outcome = 0
                     hand_active = True
                     add_score = True
-
-                    # choose modifier for this round
-                    start_new_round()
             else:
                 # if player can hit, allow them to draw a card
                 if buttons[0].collidepoint(event.pos) and player_score < 21 and hand_active:
                     my_hand, game_deck = deal_cards(my_hand, game_deck)
                 # allow player to end turn (stand)
                 elif buttons[1].collidepoint(event.pos) and not reveal_dealer:
-                    if not hidden_dealer_active:
-                        reveal_dealer= True
+                    reveal_dealer = True
                     hand_active = False
                 elif len(buttons) == 3:
                     if buttons[2].collidepoint(event.pos):
@@ -290,14 +258,13 @@ while run:
                         add_score = True
                         player_score = 0
                         dealer_score = 0
-                        start_new_round()
 
     # if player busts, automatically end turn - treat like a stand
     if hand_active and player_score >= 21:
         hand_active = False
         reveal_dealer = True
 
-    outcome, records, add_score = check_endgame(hand_active, dealer_score, player_score, outcome, records, add_score, dealer_stand_limit)
+    outcome, records, add_score = check_endgame(hand_active, dealer_score, player_score, outcome, records, add_score)
 
     
     pygame.display.flip()
