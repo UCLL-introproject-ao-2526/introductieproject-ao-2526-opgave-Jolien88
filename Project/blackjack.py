@@ -57,6 +57,7 @@ add_score = False
 current_modifier = None
 dealer_stand_limit = 17
 hidden_dealer_active = False
+soft_aces_disabled = False
 
 
 
@@ -70,18 +71,22 @@ def find_lucky_card(deck):
     return None
 
 def start_new_round():
-    global current_modifier, dealer_stand_limit, hidden_dealer_active
+    global current_modifier, dealer_stand_limit, hidden_dealer_active, soft_aces_disabled
 
     current_modifier = random.choice(modifiers)
 
     dealer_stand_limit = 17
     hidden_dealer_active = False
+    soft_aces_disabled = False
 
     if current_modifier == mod_dealer_19:
         dealer_stand_limit = 19
     
     if current_modifier == mod_hidden_dealer:
         hidden_dealer_active = True
+
+    if current_modifier == mod_soft_aces:
+        soft_aces_disabled = True
 
 # functie voor intial deal zodat de modifiers kunnen toegepast worden
 def initial_deal(my_hand, dealer_hand, deck):
@@ -152,10 +157,11 @@ def calculate_score(hand):
         elif hand[i] == 'A':
             hand_score += 11
         # determine how many aces need to be 1 instead of 11 to get under 21 if possible
-    if hand_score > 21 and aces_count > 0:
-        for i in range(aces_count):
-            if hand_score > 21:
-                hand_score -= 10
+    if not soft_aces_disabled:
+        if hand_score > 21 and aces_count > 0:
+            for i in range(aces_count):
+                if hand_score > 21:
+                    hand_score -= 10
     return hand_score
 
 # draw game conditions and buttons
@@ -237,7 +243,7 @@ while run:
     if active:
         player_score = calculate_score(my_hand)
         draw_cards(my_hand, dealer_hand, reveal_dealer)
-        if reveal_dealer:
+        if not hand_active:
             dealer_score = calculate_score(dealer_hand)
             if dealer_score < dealer_stand_limit:
                 dealer_hand, game_deck = deal_cards(dealer_hand, game_deck)
