@@ -6,8 +6,6 @@ Stappen voor de volgende keren:
     - Als ik klaar ben: deactivate
 Nadien problemen met het weergeven van de knoppen 'Hit me' en 'Stand' omdat mijn scherm kleiner is. Oplossing nog niet gevonden. 
 
-Geindigd op 18.10 min.
-
 ## 5 april 2026 13u51
 
 Tutorial Blackjack verder afgewerkt. Toch maar verder gegaan met de waarden voor het scherm die hij gebruikt. De aanpassingen ga ik achteraf doorvoeren. In de code die ik had, zaten enkele foutjes. Deze geprobeerd op te lossen. Ook zaten er in de code van de tutorial enkele dingen die niet klopten. Zoals bij een nieuw spel werd de dealer_hand nog steeds getoond, deze waarde werd dus niet terug op False gezet. Deze ook aangepast.
@@ -38,10 +36,33 @@ Debug mode gebruikt om te kijken waar het fout loopt. Er zat vanalles mis in mij
 Behoorlijk frusterend als je iets doet werken en de rest is stuk. Nu is er hetzelfde probleem bij de andere speluitkomsten. 
 
 
-## 5 mei 2026
+## 5 mei 2026 15:36
 Besloten om het toevoegen van de tekst voorlopig achterwege te laten. De aanpassingen maakten mijn code heel erg onoverzichtelijk. Via Github naar een eerdere versie van de code gegaan en deze gebruikt om verder te werken. Het toevoegen van de tekst ga ik op een andere manier implementeren in plaats van de bewegende tekst voor het dealen van de kaarten. Eerst verder werken aan de verschillende modifiers. 
 De modifier wordt gekozen op het moment dat een nieuwe ronde start, zodat de spelregels vastliggen voor de volledige hand.
 Voor Dealer Risky Mode heb ik de dealer-logica geparametriseerd met een dealer_stand_limit in plaats van vaste waarden te gebruiken. Door deze modifier toe te voegen merkte ik dat ook in andere functies deze waarden verborgen zaten. Daarom heb ik de dealer_stand_limit geparametriseerd en toegevoegd als parameter aan de end_game functie. 
 Ik merkte dat er enkel bij de eerste deal na het starten van de game een modifier gekozen werd en deze dus steeds dezelfde bleef bij volgende games. Dit kwam omdat bij de new_hand er geen nieuwe modifier gekozen werd. In plaats van dezelfde stappen als bij new_deal toe te voegen,  heb ik een helperfunctie gemaakt om dit uit te voeren. Deze heb ik dan geïmplementeerd in de bestaande functies (bij deal en new_hand)
 
 No soft aces modifier toegevoegd. Dezelfde hulpfunctie gebruikt zodat er bij elke ronde een nieuwe modifier gekozen wordt. De logica van de no soft aces zit hem in de score berekening. Een ace is dan altijd 11. Deze functie hieraan aangepast door een if statement toe te voegen. 
+
+## 8 mei 2026 13:56
+Verder aan mijn project willen werken, maar eerst het spel nog eens willen spelen om te kijken of alles werkt naar behoren. Krijg ik een foutmelding 'ModuleNotFoundError' waarbij de pygame module niet gevonden wordt. Gegoogled wat dit wil betekenen en tot de conclusie gekomen dat de foutmelding komt omdat pygame niet beschikbaar is voor mijn Python environment. Ik heb nochtans de virtuele environment opgestart, maar pas nadat ik VisualStudioCode opgestart had. VS Code afgesloten en nogmaals geprobeerd. Dit heeft het probleem opgelost.
+In de lijst van game-modifiers ook None toegevoegd, zodat soms het spel ook gewoon speelt volgens de originele opzet.
+
+De volgende stappen die ik wil doen aan de game is geluiden zetten bij player wins, player busted, dealer wins and tie game. Via Google gezocht hoe dit gedaan wordt. Uitgekomen op de Pygame mixer. Deze informatie verder bekeken. Gezien dat ik zelf voor de geluidsbestanden moet zorgen. Deze gezocht op Pixabay omdat deze rechtenvrij zijn. Om de pygame.mixer.Sound goed te laten werken, mijn mp3 geluidsbestanden geconverteerd naar wav. Geluiden implementeren in de game loop was vrij straightforward, enkel blijven ze spelen tot je op new_deal klikt. Opgezocht hoe ik ervoor kan zorgen dat het geluidseffect maar 1x afgespeeld wordt. De oplossing was eenvoudig, ik had het afspelen van de geluiden in de draw_game functie gezet, maar deze wordt elke frame uitgevoerd zolang het resultaat niet 0 is, waardoor het geluid zich bleef herhalen. De oplossing was om het afspelen van het geluid toe te voegen aan de check_endgame functie. 
+
+Omdat deze modificaties en aanpassingen minder tijd vroegen dan eerst gedacht (vooral eens de eerste modifier werkte, was het toevoegen van de anderen niet zo moeilijk, net zoals het toevoegen van het geluid) is er nog ruimte over om verdere aanpassingen te doen. 
+Enkele ideeën die ik ga verkennen:
+- card-slide geluiden
+- kaarten laten glijden op het scherm, in plaats van onmiddelijk tevoorschijn te komen
+- Casino achtig door het toevoegen van kapitaal en inzet
+- kaartafbeeldingen toevoegen
+- visueel het spel aantrekkelijker maken
+
+## 19 mei 2026 9:43
+Kaarten aangepast door afbeeldingen toe te voegen zodat het echt kaarten zijn. Code gevonden op het internet die ik gewoon kon implementeren zonder veel aanpassingen te moeten doen. Daarnaast ook een backup toegevoegd zodat indien om een of andere reden de afbeeldingen niet beschikbaar zouden zijn, de gekleurde rechthoeken opnieuw gebruikt worden. 
+
+Ik merk nu wel bij het spel, als de dealer uiteindelijk 4 kaarten heeft, dat zijn score achter de kaarten verdwijnt. Scherm 100 pixels breder gemaakt en de knoppen en score text 50 pixels naar rechts verplaatst. Merk dat de score nu niet meer achter de kaarten verdwijnt, maar toch nog erg kort erbij staat. Score nog 10 pixels naar rechts verplaatsen en kijken hoe dit er uit ziet. Dit blijkt beter maar nog erg nipt, ik voeg er nog 5 pixels bij. Dit is veel beter, hoewel het probleem blijft bestaan als de dealer 5 kaarten heeft. Voorlopig dit zo gelaten omdat dit erg zelden voorkomt in de game. 
+
+De volgende aanpassing die ik wil doorvoeren is het toevoegen van slide bewegingen aan de kaarten. Dus zodat bij het dealen van een kaart de kaart op het scherm schuift en niet gewoon verschijnt. Dit bleek een moeilijke uitdaging te zijn. Uiteindelijk een voorbeeld gevonden op het internet en mijn code hieraan aangepast. Het werken met de x en y coordinaten viel mee, maar de volledige animatie programmeren blijkt moeilijker te zijn. Uiteindelijk hulp gevraagd via contacten op Reddit die ik heb, en zij hebben mij erg vlot kunnen verder helpen met mijn code. 
+
+Het laatste dat ik wil toevoegen zijn slide geluiden bij het komen van de kaarten. mp3 bestand gevonden op Pixabay. Ik ga proberen dezelfde stappen te volgen als de win/busted/loss geluiden. Het geluid moet enkel toegevoegd worden aan de deal_cards functie, want de andere functies zoals initial_deal maken gebruik van de deal_cards functie. 

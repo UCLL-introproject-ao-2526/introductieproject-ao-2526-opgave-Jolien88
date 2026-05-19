@@ -1,16 +1,26 @@
 import copy
 import random
 import pygame
+import os
 
 # Constants
 
-cards = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
-one_deck = 4 * cards
+card_values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+card_suits = ['hearts', 'diamonds', 'clubs', 'spades']
+
+# Create one deck with all suits
+one_deck = []
+for suit in card_suits:
+    for value in card_values:
+        one_deck.append((value, suit))
+
 decks = 4
-WIDTH = 600
+WIDTH = 700
 HEIGHT = 750
 fps = 60
+CARD_SLIDE_DURATION = 20  # frames for card slide animation
 results = ["","PLAYER BUSTED o_O", "PLAYER WINS :)", "DEALER WINS :(", "TIE GAME..."]
+
 
 # Game setup
 
@@ -20,6 +30,37 @@ timer = pygame.time.Clock()
 pygame.font.init()
 font = pygame.font.Font('freesansbold.ttf', 44)
 smaller_font = pygame.font.Font('freesansbold.ttf', 36)
+pygame.mixer.init()
+
+# Load card images
+card_images = {}
+for suit in card_suits:
+    for value in card_values:
+        # Build filename from card details
+        if value == '10':
+            filename = f'cards/10_of_{suit}.png'
+        elif value == 'J':
+            filename = f'cards/jack_of_{suit}.png'
+        elif value == 'Q':
+            filename = f'cards/queen_of_{suit}.png'
+        elif value == 'K':
+            filename = f'cards/king_of_{suit}.png'
+        elif value == 'A':
+            filename = f'cards/ace_of_{suit}.png'
+        else:
+            filename = f'cards/{value}_of_{suit}.png'
+        
+        if os.path.exists(filename):
+            img = pygame.image.load(filename)
+            img = pygame.transform.scale(img, (120, 220))
+            card_images[(value, suit)] = img
+
+# Back of card image (placeholder)
+card_back = pygame.Surface((120, 220))
+card_back.fill('darkgreen')
+pygame.draw.rect(card_back, 'white', card_back.get_rect(), 3)
+back_font = pygame.font.Font('freesansbold.ttf', 20)
+back_font.render('BACK', True, 'white')
 
 # Modifiers
 
@@ -27,16 +68,15 @@ mod_lucky_start = "LUCKY START"
 mod_dealer_19 = "DEALER 19"
 mod_hidden_dealer = "HIDDEN DEALER"
 mod_soft_aces = "NO SOFT ACES"
-mod_double_draw = "DOUBLE DRAW"
-mod_time_pressure = "TIME PRESSURE"
+
 
 modifiers = [
     mod_lucky_start,
     mod_dealer_19,
     mod_hidden_dealer,
     mod_soft_aces,
-    mod_double_draw,
-    mod_time_pressure
+    None
+ 
 ]
 
 # game variables
@@ -59,6 +99,15 @@ dealer_stand_limit = 17
 hidden_dealer_active = False
 soft_aces_disabled = False
 
+# Card animation tracking
+card_animations = {}  # Store animation progress for each card
+
+# intialising sounds
+win_sound = pygame.mixer.Sound("win.wav")
+lose_sound = pygame.mixer.Sound("lose.wav")
+busted_sound = pygame.mixer.Sound("busted.wav")
+tie_sound = pygame.mixer.Sound("tie.wav")
+draw_sound = pygame.mixer.Sound("taking_playing_card.mp3")
 
 
 
@@ -66,7 +115,7 @@ soft_aces_disabled = False
 
 def find_lucky_card(deck):
     for card in deck:
-        if card in ['10', 'J', 'Q', 'K']:
+        if card[0] in ['10', 'J', 'Q', 'K']:
             return card
     return None
 
@@ -90,12 +139,16 @@ def start_new_round():
 
 # functie voor intial deal zodat de modifiers kunnen toegepast worden
 def initial_deal(my_hand, dealer_hand, deck):
+    global card_animations
     # Lucky Start modifier
     if current_modifier == mod_lucky_start:
         lucky_card = find_lucky_card(deck)
         if lucky_card is not None:
             my_hand.append(lucky_card)
             deck.remove(lucky_card)
+            # Start animation for lucky card
+            card_animations[('player', len(my_hand) - 1)] = 0.0
+
         
     # vul kaarten aan tot 2 kaarten voor de speler
     while len(my_hand) < 2:
@@ -112,49 +165,105 @@ def deal_cards(current_hand, current_deck):
     card = random.randint(0, len(current_deck)-1)
     current_hand.append(current_deck[card])
     current_deck.pop(card)
+    
+    # Play card deal sound
+    draw_sound.play()
+    
+    # Start animation for the new card
+    if current_hand == my_hand:
+        card_key = ('player', len(current_hand) - 1)
+    else:
+        card_key = ('dealer', len(current_hand) - 1)
+    card_animations[card_key] = 0.0
+    
     return current_hand, current_deck
 
 # draw scores for player and dealer on screen
 def draw_scores(player, dealer):
-    screen.blit(font.render(f'Score[{player}]', True, 'white'), (350, 400))
+    screen.blit(font.render(f'Score[{player}]', True, 'white'), (415, 400))
     if reveal_dealer:
-        screen.blit(font.render(f'Score[{dealer}]', True, 'white'), (350, 100))
+        screen.blit(font.render(f'Score[{dealer}]', True, 'white'), (415, 100))
 
 # draw cards visually onto screen
 def draw_cards(player, dealer, reveal):
     for i in range(len(player)):
-        pygame.draw.rect(screen, 'white', [70 + (70 *i), 320 + (5 * i), 120, 220], 0, 5)
-        screen.blit(font.render(player[i], True, 'black'), (75 + 70*i, 325 + 5*i))
-        screen.blit(font.render(player[i], True, 'black'), (75 + 70*i, 495 + 5*i))
-        pygame.draw.rect(screen, 'red', [70 + (70 *i), 320 + (5 * i), 120, 220], 5, 5)
+        x, y = 70 + (70 * i), 320 + (5 * i)
+        card_key = ('player', i)
+        
+        # Check if card is animating
+        if card_key in card_animations:
+            progress = card_animations[card_key]
+            # Slide from bottom (y + 100) to final position
+            anim_y = y + 100 * (1 - progress)
+            anim_x = x
+        else:
+            anim_x, anim_y = x, y
+        
+        # Draw card image if available
+        if player[i] in card_images:
+            screen.blit(card_images[player[i]], (anim_x, anim_y))
+        else:
+            # Fallback to colored rectangle
+            pygame.draw.rect(screen, 'white', [anim_x, anim_y, 120, 220], 0, 5)
+            screen.blit(font.render(player[i][0], True, 'black'), (anim_x + 5, anim_y + 5))
+            pygame.draw.rect(screen, 'red', [anim_x, anim_y, 120, 220], 5, 5)
     
     # if player hasn't finished turn, dealer will hide one card
     for i in range(len(dealer)):
-        pygame.draw.rect(screen, 'white', [70 + (70 *i), 75 + (5 * i), 120, 220], 0, 5)
-        if i != 0 or reveal:
-            screen.blit(font.render(dealer[i], True, 'black'), (75 + 70*i, 80 + 5*i))
-            screen.blit(font.render(dealer[i], True, 'black'), (75 + 70*i, 245 + 5*i))
+        x, y = 70 + (70 * i), 75 + (5 * i)
+        card_key = ('dealer', i)
+        
+        # Check if card is animating
+        if card_key in card_animations:
+            progress = card_animations[card_key]
+            # Slide from top (y - 100) to final position
+            anim_y = y - 100 * (1 - progress)
+            anim_x = x
         else:
-            screen.blit(font.render('???', True, 'black'), (75 + 70*i, 80 + 5*i))
-            screen.blit(font.render('???', True, 'black'), (75 + 70*i, 245 + 5*i))
+            anim_x, anim_y = x, y
+        
+        if i != 0 or reveal:
+            # Draw card image if available
+            if dealer[i] in card_images:
+                screen.blit(card_images[dealer[i]], (anim_x, anim_y))
+            else:
+                pygame.draw.rect(screen, 'white', [anim_x, anim_y, 120, 220], 0, 5)
+                screen.blit(font.render(dealer[i][0], True, 'black'), (anim_x + 5, anim_y + 5))
+                pygame.draw.rect(screen, 'blue', [anim_x, anim_y, 120, 220], 5, 5)
+        else:
+            # Hidden card
+            screen.blit(card_back, (anim_x, anim_y))
 
-        pygame.draw.rect(screen, 'blue', [70 + (70 *i), 75 + (5 * i), 120, 220], 5, 5)
+# Update card animations
+def update_animations():
+    global card_animations
+    keys_to_remove = []
+    for key in card_animations:
+        card_animations[key] += 1.0 / CARD_SLIDE_DURATION
+        if card_animations[key] >= 1.0:
+            card_animations[key] = 1.0
+            keys_to_remove.append(key)
+    
+    # Remove finished animations
+    for key in keys_to_remove:
+        del card_animations[key]
 
 # pass in player or dealer hand and get best score possible
 def calculate_score(hand):
     # calculate hand score fresh every time, check how many aces we have
     hand_score = 0
-    aces_count = hand.count('A')
+    aces_count = sum(1 for card in hand if card[0] == 'A')
     for i in range(len(hand)):
+        card_value = hand[i][0]  # Extract value from (value, suit) tuple
         # 2,3,4,5,6,7,8,9 - just add the number to total
         for j in range(8):
-            if hand[i] == cards[j]:
-                hand_score += int(hand[i])
+            if card_value == card_values[j]:
+                hand_score += int(card_value)
         # for 10 and face cards, add 10
-        if hand[i] in ['10', 'J', 'Q', 'K']:
+        if card_value in ['10', 'J', 'Q', 'K']:
             hand_score += 10
         # for aces start by adding 11, we'll check if we need to reduce afterwards
-        elif hand[i] == 'A':
+        elif card_value == 'A':
             hand_score += 11
         # determine how many aces need to be 1 instead of 11 to get under 21 if possible
     if not soft_aces_disabled:
@@ -169,35 +278,35 @@ def draw_game(act, record, result):
     button_list = []
     # initially on startup (not active) only option is to deal new hand
     if not act:
-        deal = pygame.draw.rect(screen, 'white', [150, 20, 300, 100], 0, 5)
-        pygame.draw.rect(screen, 'green', [150, 20, 300, 100], 3, 5)
+        deal = pygame.draw.rect(screen, 'white', [200, 20, 300, 100], 0, 5)
+        pygame.draw.rect(screen, 'green', [200, 20, 300, 100], 3, 5)
         deal_text = font.render('DEAL HAND', True, 'black')
-        screen.blit(deal_text, (165, 50))
+        screen.blit(deal_text, (215, 50))
         button_list.append(deal)
     # once game started, show hit and stand buttons and win/loss records
     else:
-        hit = pygame.draw.rect(screen, 'white', [0, 600, 300, 100], 0, 5)
-        pygame.draw.rect(screen, 'green', [0, 600, 300, 100], 3, 5)
+        hit = pygame.draw.rect(screen, 'white', [50, 600, 300, 100], 0, 5)
+        pygame.draw.rect(screen, 'green', [50, 600, 300, 100], 3, 5)
         hit_text = font.render('HIT ME', True, 'black')
-        screen.blit(hit_text, (55, 635))
+        screen.blit(hit_text, (105, 635))
         button_list.append(hit)
 
-        stand = pygame.draw.rect(screen, 'white', [300, 600, 300, 100], 0, 5)
-        pygame.draw.rect(screen, 'green', [300, 600, 300, 100], 3, 5)
+        stand = pygame.draw.rect(screen, 'white', [350, 600, 300, 100], 0, 5)
+        pygame.draw.rect(screen, 'green', [350, 600, 300, 100], 3, 5)
         stand_text = font.render('STAND', True, 'black')
-        screen.blit(stand_text, (355, 635))
+        screen.blit(stand_text, (405, 635))
         button_list.append(stand)
         
         score_text = smaller_font.render(f'Wins: {record[0]}   Losses: {record[1]}   Draws: {record[2]}', True, 'white')
-        screen.blit(score_text, (15, 710))
+        screen.blit(score_text, (65, 710))
     ## if there is an outcome for the hand that was played, display a restart button and tell player what happened
     if result != 0:
         screen.blit(font.render(results[result], True, 'white'), (15, 25))
-        deal = pygame.draw.rect(screen, 'white', [150, 250, 300, 100], 0, 5)
-        pygame.draw.rect(screen, 'green', [150, 250, 300, 100], 3, 5)
-        pygame.draw.rect(screen, 'black', [153, 253, 294, 94], 3, 5)        
+        deal = pygame.draw.rect(screen, 'white', [200, 250, 300, 100], 0, 5)
+        pygame.draw.rect(screen, 'green', [200, 250, 300, 100], 3, 5)
+        pygame.draw.rect(screen, 'black', [203, 253, 294, 94], 3, 5)        
         deal_text = font.render('NEW HAND', True, 'black')
-        screen.blit(deal_text, (175, 280))
+        screen.blit(deal_text, (225, 280))
         button_list.append(deal)
     return button_list
     
@@ -217,6 +326,16 @@ def check_endgame(hand_act, deal_score, play_score, result, totals, add, dealer_
         else:
             result = 4
         if add:
+            if result == 1:
+                busted_sound.play()
+            elif result == 2:
+                win_sound.play()
+            elif result == 3:
+                lose_sound.play()
+            elif result == 4:
+                tie_sound.play()
+
+            
             if result == 1 or result == 3:
                 totals[1] += 1
             elif result == 2:
@@ -232,6 +351,7 @@ run = True
 while run:
     # run game at our framerate and fill screen with bg color
     timer.tick(fps)
+    update_animations()  # Update card animations every frame
     screen.fill('black')
     # initial deal to player and dealer
     if start_new_hand:
