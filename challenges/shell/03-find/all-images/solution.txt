@@ -1,1 +1,1 @@
-find *.png *.jpg
+find -iname "*.png, *.jpg" | xargs

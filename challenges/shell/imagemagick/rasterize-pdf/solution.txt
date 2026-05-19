@@ -1,0 +1,1 @@
+magick convert document.pdf page%d.png

@@ -2,4 +2,4 @@
 
 Who is hidden in this image?
 
-![Image](./whoami.png)
+[Image](./whoami.png)

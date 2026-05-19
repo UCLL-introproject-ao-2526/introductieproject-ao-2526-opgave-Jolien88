@@ -2,16 +2,16 @@
     {
         "country": "France",
         "capital": "Paris",
-        "population": 69
+        "population": "69"
     },
     {   
         "country": "Belgium",
         "capital": "Brussels",
-        "population": 12
+        "population": "12"
     },
     {
         "country": "Netherlands",
         "capital": "Amsterdam",
-        "population": 17
+        "population": "17"
     }
 ]

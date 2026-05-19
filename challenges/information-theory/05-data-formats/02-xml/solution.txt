@@ -1,35 +1,36 @@
+
 <countries>
     <country>
         <name>
-            <France>
+            France
         </name>
         <capital>
-            <Paris>
+            Paris
         </capital>
         <population>
-            <69>
+            69
         </population>
     </country>
-        <country>
+    <country>
         <name>
-            <Belgium>
+            Belgium
         </name>
         <capital>
-            <Brussels>
+            Brussels
         </capital>
         <population>
-            <12>
+            12
         </population>
     </country>
-        <country>
+    <country>
         <name>
-            <Netherlands>
+            Netherlands
         </name>
         <capital>
-            <Amsterdam>
+            Amsterdam
         </capital>
         <population>
-            <17>
+            17
         </population>
     </country>
 </countries>
