@@ -59,8 +59,6 @@ for suit in card_suits:
 card_back = pygame.Surface((120, 220))
 card_back.fill('darkgreen')
 pygame.draw.rect(card_back, 'white', card_back.get_rect(), 3)
-back_font = pygame.font.Font('freesansbold.ttf', 20)
-back_font.render('BACK', True, 'white')
 
 # Modifiers
 
@@ -92,6 +90,7 @@ outcome = 0
 reveal_dealer = False
 hand_active = False
 add_score = False
+dealer_draw_timer = 0  # Timer for dealer card drawing delay
 
 # variables for implementing modifiers
 current_modifier = None
@@ -185,7 +184,7 @@ def draw_scores(player, dealer):
         screen.blit(font.render(f'Score[{dealer}]', True, 'white'), (415, 100))
 
 # draw cards visually onto screen
-def draw_cards(player, dealer, reveal):
+def draw_cards(player, dealer, reveal, hidden_active):
     for i in range(len(player)):
         x, y = 70 + (70 * i), 320 + (5 * i)
         card_key = ('player', i)
@@ -222,17 +221,17 @@ def draw_cards(player, dealer, reveal):
         else:
             anim_x, anim_y = x, y
         
-        if i != 0 or reveal:
+        # Hide first dealer card until player stands or busts (standard blackjack rule)
+        if not reveal_dealer and i == 0:
+            screen.blit(card_back, (anim_x, anim_y))
+        else:
             # Draw card image if available
             if dealer[i] in card_images:
                 screen.blit(card_images[dealer[i]], (anim_x, anim_y))
             else:
                 pygame.draw.rect(screen, 'white', [anim_x, anim_y, 120, 220], 0, 5)
                 screen.blit(font.render(dealer[i][0], True, 'black'), (anim_x + 5, anim_y + 5))
-                pygame.draw.rect(screen, 'blue', [anim_x, anim_y, 120, 220], 5, 5)
-        else:
-            # Hidden card
-            screen.blit(card_back, (anim_x, anim_y))
+
 
 # Update card animations
 def update_animations():
@@ -358,15 +357,22 @@ while run:
             my_hand, dealer_hand, game_deck = initial_deal(my_hand, dealer_hand, game_deck)
             start_new_hand = False
             active = True
+            dealer_draw_timer = 0
 
     # once game is activated, and dealt, calculate scores and display cards
     if active:
         player_score = calculate_score(my_hand)
-        draw_cards(my_hand, dealer_hand, reveal_dealer)
-        if not hand_active:
+        draw_cards(my_hand, dealer_hand, reveal_dealer, hidden_dealer_active)
+        # Calculate dealer score at all times (including hidden first card)
+        if len(dealer_hand) > 0:
             dealer_score = calculate_score(dealer_hand)
-            if dealer_score < dealer_stand_limit:
+        # Dealer draws one card every 30 frames if needed
+        # If hidden_dealer is active, only draw after player stands. Otherwise, draw during play
+        dealer_draw_timer += 1
+        if dealer_draw_timer >= 30 and dealer_score < dealer_stand_limit:
+            if not hidden_dealer_active or not hand_active:
                 dealer_hand, game_deck = deal_cards(dealer_hand, game_deck)
+                dealer_draw_timer = 0
         draw_scores(player_score, dealer_score)
     buttons = draw_game(active, records, outcome)
 
@@ -387,21 +393,23 @@ while run:
                     game_deck = copy.deepcopy(decks * one_deck)
                     my_hand = []
                     dealer_hand = []
+                    # choose modifier for this round
+                    start_new_round()
                     reveal_dealer = False
                     outcome = 0
                     hand_active = True
                     add_score = True
+                    player_score = 0
+                    dealer_score = 0
 
-                    # choose modifier for this round
-                    start_new_round()
+                    
             else:
                 # if player can hit, allow them to draw a card
                 if buttons[0].collidepoint(event.pos) and player_score < 21 and hand_active:
                     my_hand, game_deck = deal_cards(my_hand, game_deck)
                 # allow player to end turn (stand)
-                elif buttons[1].collidepoint(event.pos) and not reveal_dealer:
-                    if not hidden_dealer_active:
-                        reveal_dealer= True
+                elif buttons[1].collidepoint(event.pos):
+                    reveal_dealer= True
                     hand_active = False
                 elif len(buttons) == 3:
                     if buttons[2].collidepoint(event.pos):
@@ -410,13 +418,15 @@ while run:
                         game_deck = copy.deepcopy(decks * one_deck)
                         my_hand = []
                         dealer_hand = []
+
+                        start_new_round()
                         reveal_dealer = False
                         outcome = 0
                         hand_active = True
                         add_score = True
                         player_score = 0
                         dealer_score = 0
-                        start_new_round()
+                
 
     # if player busts, automatically end turn - treat like a stand
     if hand_active and player_score >= 21:
