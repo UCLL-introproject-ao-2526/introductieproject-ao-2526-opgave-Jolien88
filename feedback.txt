@@ -1,0 +1,16 @@
+Hallo Daan,
+
+Ik stuur je deze email om feedback te geven over de aangeboden challenges van het introductieproject.
+
+Ik merkte voor mezelf dat ik de regex challenges niet zo aangenaam vond. Ik miste hier vooral extra duiding en/of uitleg over hoe een regex in elkaar zit. De website die aangeboden werd om de regex patronen uit te testen is erg handig, maar een goede bron waar de patronen uitgelegd staan zou handig zijn.
+
+De shell challenges bleken voor mij erg moeilijk. Ik heb veel van de challenges in mijn eigen gitbash terminal geprobeerd en velen ervan werkten, maar als ik deze oplossing gebruikte, werd deze niet goedgekeurd. Ik denk dat wat tips en of tricks rondom deze challenges handig zouden kunnen zijn.
+
+Hetzelfde probleem ervaarde ik bij de challenges omtrent vscode. Ik heb de originele windows cheatsheet erbij genomen, maar toch lukte het me niet om het grotendeel van de challenges op te lossen. Het was me ook niet altijd duidelijk op welke manier we bepaalde 'keyboard toetsen' in de oplossing moesten weergeven. Bijvoorbeeld de key voor de linkse pijl, moet dit LEFT zijn, of ARROWLEFT, ARROW-LEFT, LEFT-ARROW. Ik heb ook shortcuts gevonden die bestonden uit een sequentie van toetsen. Misschien is het een idee dat we voor de challenges kunnen samenwerken in kleine groepjes van medestudenten om zo tot verschillende ideeën en oplossingen te komen. 
+
+Algemeen vond ik de meeste challenges erg leuk om te doen. Ik heb veel bijgeleerd en was aangenaam verrast om te zien hoeveel programmeertalen er eigenlijk bestaan (en waar je meestal niets van hoort).
+Mezelf kennende zal ik waarschijnlijk in de zomervakantie proberen de niet opgeloste challenges alsnog op te lossen.
+
+Met vriendelijke groeten
+
+Jolien Bammens
