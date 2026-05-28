@@ -1,0 +1,6 @@
+Challenges
+
+Challenge shell, creating-directory
+shell, removing-directory
+shell move-images
+find all-images (welk directory?)
