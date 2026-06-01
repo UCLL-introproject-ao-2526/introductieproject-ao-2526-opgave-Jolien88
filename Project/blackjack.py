@@ -37,6 +37,8 @@ card_images = {}
 for suit in card_suits:
     for value in card_values:
         # Build filename from card details
+        # [dn] dit is een situatie waar een dictonary perfect zou zijn: letter_to_name = { 'A' : "ace", 'K' : "king" } 
+        # dan vereenvoudig alles tot f'cards/{letter_to_name[value]}_of_{suit}.png'
         if value == '10':
             filename = f'cards/10_of_{suit}.png'
         elif value == 'J':
@@ -73,7 +75,7 @@ modifiers = [
     mod_dealer_19,
     mod_hidden_dealer,
     mod_soft_aces,
-    None
+    None # [dn] ik zal verder kijken, maar vermoed al meteen dat dit niet nodig is
  
 ]
 
@@ -99,7 +101,7 @@ hidden_dealer_active = False
 soft_aces_disabled = False
 
 # Card animation tracking
-card_animations = {}  # Store animation progress for each card
+card_animations = {}  # Store animation progress for each card [dn] good comment. You can also add a commented example to illustrate the format
 
 # intialising sounds
 win_sound = pygame.mixer.Sound("win.wav")
@@ -132,7 +134,7 @@ def start_new_round():
     
     if current_modifier == mod_hidden_dealer:
         hidden_dealer_active = True
-
+    # [dn] het is equivalent, maar we gaan hier meestal een else if (elif) gebruiken, want er kan maar 1 modifier zijn
     if current_modifier == mod_soft_aces:
         soft_aces_disabled = True
 
@@ -154,8 +156,15 @@ def initial_deal(my_hand, dealer_hand, deck):
         my_hand, deck = deal_cards(my_hand, deck)
 
     # dealer krijgt 2 kaarten
+    # [dn] we proberen meestal code niet te dupliceren, want als we iets moeten veranderen is de kans groot dat we vergeten het op meerdere plaatsen aan 
+    # te passen. Hier kan je twee geneste lussen gebruiken:
+    #  for hand in [my_hand, dealer_hand]: 
+    #     while len(hand) < 2:
+    # groot voordeel is dat dat ook meteen werkt 
     while len(dealer_hand) <  2:
         dealer_hand, deck = deal_cards(dealer_hand, deck)
+
+    
     
     return my_hand, dealer_hand, deck
 
@@ -169,6 +178,7 @@ def deal_cards(current_hand, current_deck):
     draw_sound.play()
     
     # Start animation for the new card
+    # [dn] hier kan je ook duplicatie van code vermijden. Google eens naar 'python ternary'
     if current_hand == my_hand:
         card_key = ('player', len(current_hand) - 1)
     else:
@@ -251,7 +261,7 @@ def update_animations():
 def calculate_score(hand):
     # calculate hand score fresh every time, check how many aces we have
     hand_score = 0
-    aces_count = sum(1 for card in hand if card[0] == 'A')
+    aces_count = sum(1 for card in hand if card[0] == 'A') # [dn] <3 lambda
     for i in range(len(hand)):
         card_value = hand[i][0]  # Extract value from (value, suit) tuple
         # 2,3,4,5,6,7,8,9 - just add the number to total
@@ -259,6 +269,7 @@ def calculate_score(hand):
             if card_value == card_values[j]:
                 hand_score += int(card_value)
         # for 10 and face cards, add 10
+        # [dn] tweede keer dat je de array definieert. beter om een helper methode 
         if card_value in ['10', 'J', 'Q', 'K']:
             hand_score += 10
         # for aces start by adding 11, we'll check if we need to reduce afterwards
@@ -276,7 +287,14 @@ def calculate_score(hand):
 def draw_game(act, record, result):
     button_list = []
     # initially on startup (not active) only option is to deal new hand
-    if not act:
+    if not act: # [dn] als je de blokken omdraait heb je de not niet nodig
+        # [dn] heel veel repetitie van waarden (bvb 300, 600, 200)
+        # als je ze in een variabele steekt kan je er meteen ook een naam aan geven, 
+        # dat is goeie documentatie
+        # [dn] ook voor de kleuren: gebruik een variabele. Ipv 'white', bright_color = 'white', dan kan je 
+        # het later op 1 plaats aanpassen, of gemakkelijk een 'dark mode' implementeren
+        # eigenlijk mag je nooit values (getallen, strings) dupliceren als ze naar hetzelfde verwijzen
+        
         deal = pygame.draw.rect(screen, 'white', [200, 20, 300, 100], 0, 5)
         pygame.draw.rect(screen, 'green', [200, 20, 300, 100], 3, 5)
         deal_text = font.render('DEAL HAND', True, 'black')
